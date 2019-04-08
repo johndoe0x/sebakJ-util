@@ -1,0 +1,21 @@
+group 'boscoin.sebak'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url "https://jitpack.io" }
+    maven { url "https://dl.bintray.com/ethereum/maven/" }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
+    implementation 'com.github.stellar:java-stellar-sdk:0.6.0'
+    compile 'io.github.novacrypto:Base58:2019.01.27@jar'
+    implementation "org.ethereum:ethereumj-core:1.9.+"
+}

@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -109,8 +110,10 @@ class  TxHead {
 
     }
     public String getCreated() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date createdTime = new Date();
+        Calendar calendar = Calendar.getInstance();
+        Date createdTime = calendar.getTime();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
         String created = simpleDateFormat.format(createdTime);
         return created;
     }

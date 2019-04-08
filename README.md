@@ -49,6 +49,7 @@ Every elements of Header `type` are `String`.
 
 3. For instance:
    ```java
+    ...
     Operation operation1 = new Operation(type1,target1,amount1,"");
     Operation operation2 = new Operation(type2,target2,amount2,"");
    
@@ -63,6 +64,7 @@ Every elements of Header `type` are `String`.
     transaction.B.source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
     transaction.B.sequence_id = new BigInteger(sequence_id);
     transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);
+    ...
    ```
  
 ### Transaction body
@@ -103,7 +105,7 @@ This limit also can be checked by node information.
 You can see the how operation lists make :
 
 ```java
-
+ ...
 String type1 = "payment";
 String type2 = "create-account";
 String amount1 = "100";
@@ -117,7 +119,7 @@ ArrayList<Operation> operations = new ArrayList<Operation>();
     
 operations.add(operation1);
 operations.add(operation2);
-
+ ...
 ``` 
 #### Create account operation
 
@@ -134,6 +136,71 @@ Target address must exist in network.
 
 ## Sending Transaction
 
+```java
+
+String newtork_id = "sebak-test-network";
+String sequence_id; // you have to search Sequence id on Sebak network through API.
+String type1 = "payment";
+String type2 = "create-account";
+String amount1 = "100";
+String amount2 = "1000000";
+String targetAddress1 = "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE";
+String targetAddress2 = "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV";
+Operation op1 = new Operation(type1, amount1, targetAddress1);
+Operation op2 = new Operation(type2, amount2, targetAddress2);
+
+ArrayList<Operation> operations = new ArrayList<Operation>();
+operations.add(operation1);
+operations.add(operation2);
+
+Transaction transaction  = new Transaction(operations);
+transaction.B.source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
+transaction.B.sequence_id = new BigInteger(sequence_id);
+transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);
+
+```
+
+If you successfully sign your transaction, you can serialize your transaction instance to 'json'.
+
+```json
+
+String json = transaction.formjson();
+
+{
+  "H": {
+    "version": "1",
+    "created": "",
+    "signature": "nU46BuF6f1PUUCoHoy3EXMxdibvRC6ZYyzLPsr4aNJYJnDDvSdcn52Qf9CGy5R9UbkMgW6mdKGwrHNvd3oCoRsp"
+  },
+  "B": {
+    "source": "GAG5EESGOZIHTKK5N2NBHX25EWRC3S3TWZT7RMCSBX65A3KTJKILQKCF",
+    "fee": "20000",
+    "sequence_id": 1,
+    "operations": [
+      {
+        "H": {
+          "type": "payment"
+        },
+        "B": {
+          "amount": "100",
+          "target": "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE"
+        }
+      },
+      {
+        "H": {
+          "type": "create-account"
+        },
+        "B": {
+          "amount": "1000000",
+          "target": "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV",
+          "linked": ""
+        }
+      }
+    ]
+  }
+}
+
+```
 
 
 

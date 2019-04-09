@@ -58,7 +58,7 @@ public class TransactionTest {
         transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);
 
         String result = transaction.formJson();
-
+        System.out.println(result);
 
 
 

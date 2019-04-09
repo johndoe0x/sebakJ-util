@@ -36,7 +36,8 @@ public class Transaction {
         String txJsonform ;
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        txJsonform = objectMapper.writeValueAsString(this);
+        txJsonform = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+        System.out.println(txJsonform);
         return txJsonform;
 
     }

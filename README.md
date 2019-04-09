@@ -169,7 +169,7 @@ String json = transaction.formjson();
 {
   "H": {
     "version": "1",
-    "created": "",
+    "created": "2019-04-09T13:05:25.000000039+09:00",
     "signature": "nU46BuF6f1PUUCoHoy3EXMxdibvRC6ZYyzLPsr4aNJYJnDDvSdcn52Qf9CGy5R9UbkMgW6mdKGwrHNvd3oCoRsp"
   },
   "B": {

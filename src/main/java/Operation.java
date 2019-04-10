@@ -1,77 +1,64 @@
 import java.util.ArrayList;
 
 public class Operation {
-    String target, amount, linked;
+
 
     OperationHeader H;
+    OperationBody B;
 
-    public Operation(OperationHeader H, String target, String amount, String linked) {
-        this.H = H;
+
+    public  Operation(String type, String target, String amount) {
+        this.H = new OperationHeader(type);
+        try{
+            if (H.type.matches("create-account")) {
+                this.B = new CreateAccOps(target,amount,"");
+
+            }
+            if (H.type.matches("payment")) {
+                this.B = new PaymentOps(target,amount);
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Object[] toArray(){
+        Object[] result = {this.H.toArray(), this.B.toArray()};
+        return result;
+    }
+
+}
+
+class CreateAccOps implements OperationBody{
+
+    String target, amount, linked;
+
+    public CreateAccOps( String target, String amount, String linked) {
         this.target = target;
         this.amount = amount;
         this.linked = linked;
     }
 
-    public  Object[] Operation() {
-        try{
-            if (H.type.matches("create-account")) {
-                H.type = "create-account";
-                CreateAccOps createAccOps = new CreateAccOps(this.H,this.target,this.amount,this.linked);
-                return createAccOps.CreateAcc_Array();
-            }
-            if (H.type.matches("payment")) {
-                H.type = "payment";
-               PaymentOps  paymentOps = new PaymentOps(this.H,this.target,this.amount);
-                return paymentOps.Payment_Array();
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-        String [] errMsg={"unknown operation type found:"};
-        String[][] result = {errMsg,{this.H.type}};
+    @Override
+    public String[] toArray() {
+        String[] result = {this.target,this.amount,this.linked};
         return result;
     }
-
 }
 
-class CreateAccOps{
-    OperationHeader H;
-    CreateAccOperationBody B = new CreateAccOperationBody();
-    String target, amount, linked;
-
-
-    public CreateAccOps(OperationHeader H, String target, String amount, String linked) {
-        this.H = H;
-        this.B.target = target;
-        this.B.amount = amount;
-        this.B.linked = linked;
-    }
-
-    public Object[][] CreateAcc_Array(){
-         Object[][] result = {this.H.toArray(),this.B.CreateAcctoArray()};
-         return result;
-
-    }
-
-
-}
-
-class PaymentOps {
-    OperationHeader H;
-    paymentOperationBody B = new paymentOperationBody();
+class PaymentOps implements OperationBody{
     String target,amount;
 
-    public PaymentOps(OperationHeader H, String target, String amount) {
-        this.H = H;
-        this.B.target = target;
-        this.B.amount = amount;
+    public PaymentOps( String target, String amount) {
+        this.target = target;
+        this.amount = amount;
     }
-    public Object[][] Payment_Array(){
-        Object[][] result = {this.H.toArray(),this.B.PaymentArray()};
+
+    @Override
+    public String[] toArray() {
+        String[] result = {this.target,this.amount};
         return result;
-
     }
-
 }
 
 class OperationHeader {
@@ -89,22 +76,8 @@ class OperationHeader {
 
 }
 
-class CreateAccOperationBody{
-    String target,amount,linked;
 
-    public String[] CreateAcctoArray(){
-        String[] array = {this.target,this.amount,this.linked};
-        System.out.println();
-        return array;
-    }
-
+interface OperationBody {
+    abstract String[] toArray();
 }
 
-class  paymentOperationBody{
-    String target,amount;
-
-    public String[] PaymentArray(){
-        String[] array = {this.target,this.amount};
-        return array;
-    }
-}

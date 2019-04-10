@@ -26,10 +26,8 @@ public class TransactionTest {
     @Test
     public void doHashing() throws Exception {
 
-        OperationHeader operationHeader1 = new OperationHeader(type1);
-        OperationHeader operationHeader2 = new OperationHeader(type2);
-        Operation operation1 = new Operation(operationHeader1,target1,amount1,"");
-        Operation operation2 = new Operation(operationHeader2,target2,amount2,"");
+        Operation operation1 = new Operation(type1,target1,amount1);
+        Operation operation2 = new Operation(type2,target2,amount2);
 
         ArrayList<Operation> operations = new ArrayList<Operation>();
 
@@ -48,13 +46,11 @@ public class TransactionTest {
 
     @Test
     public void formJson() throws Exception {
-        OperationHeader operationHeader1 = new OperationHeader(type1);
-        OperationHeader operationHeader2 = new OperationHeader(type2);
 
 
-        Operation operation1 = new Operation(operationHeader1,target1,amount1,"");
-        Operation operation2 = new Operation(operationHeader2,target2,amount2,"");
 
+        Operation operation1 = new Operation(type1,target1,amount1);
+        Operation operation2 = new Operation(type2,target2,amount2);
         ArrayList<Operation> operations = new ArrayList<Operation>();
 
         operations.add(operation1);

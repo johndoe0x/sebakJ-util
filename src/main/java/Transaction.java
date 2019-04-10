@@ -53,6 +53,7 @@ public class Transaction {
 
     public String doHashing() throws NoSuchAlgorithmException {
         byte[] Rlpencoded = RLP.encode(this.B.operationsArray());
+        //System.out.println(Util.ByteArrayToHexString(Rlpencoded));;
         String Hashresult = Base58.base58Encode(this.Doublesha256Hash(Rlpencoded));
         return Hashresult;
     }
@@ -93,7 +94,7 @@ class TxBody{
     public Object[] operationsArray(){
         ArrayList<Object> arrayList = new ArrayList<Object>();
         for (Operation operation : this.operations) {
-            arrayList.add(operation.Operation());
+            arrayList.add(operation.toArray());
         }
         Object[] operationsList = arrayList.toArray(new Object[arrayList.size()]);
         Object[] result = {this.source,this.fee,this.sequence_id,operationsList};

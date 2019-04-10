@@ -167,38 +167,36 @@ If you successfully sign your transaction, you can serialize your transaction in
 String json = transaction.formjson();
 
 {
-  "H": {
-    "version": "1",
-    "created": "2019-04-09T13:05:25.000000039+09:00",
-    "signature": "nU46BuF6f1PUUCoHoy3EXMxdibvRC6ZYyzLPsr4aNJYJnDDvSdcn52Qf9CGy5R9UbkMgW6mdKGwrHNvd3oCoRsp"
+  "H" : {
+    "version" : "1",
+    "created" : "2019-04-10T13:13:54.000000951+09:00",
+    "signature" : "nU46BuF6f1PUUCoHoy3EXMxdibvRC6ZYyzLPsr4aNJYJnDDvSdcn52Qf9CGy5R9UbkMgW6mdKGwrHNvd3oCoRsp"
   },
-  "B": {
-    "source": "GAG5EESGOZIHTKK5N2NBHX25EWRC3S3TWZT7RMCSBX65A3KTJKILQKCF",
-    "fee": "20000",
-    "sequence_id": 1,
-    "operations": [
-      {
-        "H": {
-          "type": "payment"
-        },
-        "B": {
-          "amount": "100",
-          "target": "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE"
-        }
+  "B" : {
+    "source" : "GAG5EESGOZIHTKK5N2NBHX25EWRC3S3TWZT7RMCSBX65A3KTJKILQKCF",
+    "fee" : "20000",
+    "sequence_id" : 1,
+    "operations" : [ {
+      "H" : {
+        "type" : "payment"
       },
-      {
-        "H": {
-          "type": "create-account"
-        },
-        "B": {
-          "amount": "1000000",
-          "target": "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV",
-          "linked": ""
-        }
+      "B" : {
+        "target" : "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE",
+        "amount" : "100"
       }
-    ]
+    }, {
+      "H" : {
+        "type" : "create-account"
+      },
+      "B" : {
+        "target" : "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV",
+        "amount" : "1000000",
+        "linked" : ""
+      }
+    } ]
   }
 }
+
 
 ```
 

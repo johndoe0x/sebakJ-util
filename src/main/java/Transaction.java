@@ -53,7 +53,7 @@ public class Transaction {
 
     public String doHashing() throws NoSuchAlgorithmException {
         byte[] Rlpencoded = RLP.encode(this.B.operationsArray());
-        //System.out.println(Util.ByteArrayToHexString(Rlpencoded));;
+        System.out.println(Util.ByteArrayToHexString(Rlpencoded));;
         String Hashresult = Base58.base58Encode(this.Doublesha256Hash(Rlpencoded));
         return Hashresult;
     }

@@ -8,6 +8,14 @@
 
 - IntelliJ (recommended)
 
+## Test
+
+- You have to check your JVM version is `1.8`.
+
+- running `$ ./gradlew test` or `$ gradle test`. 
+
+Then you can see the test result. 
+
 ## Before transaction create... You need
 
 - **Secret seed** of sender. 

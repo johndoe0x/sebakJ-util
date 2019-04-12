@@ -58,17 +58,17 @@ Every elements of Header `type` are `String`.
 3. For instance:
    ```java
     ...
-    Operation operation1 = new Operation(type1,target1,amount1,"");
-    Operation operation2 = new Operation(type2,target2,amount2,"");
+   Operation operation1 = new Operation(type1,target1,amount1);
+   Operation operation2 = new Operation(type2,target2,amount2);
    
-    ArrayList<Operation> operations = new ArrayList<Operation>();
-    
-    operations.add(operation1);
-    operations.add(operation2);
-    Transaction transaction  = new Transaction(operations);
+   ArrayList<Operation> operations = new ArrayList<Operation>();
+   
+   operations.add(operation1);
+   operations.add(operation2);
+          
     // When you Hashing through RLP encoding variables have to include 
     // source, fee, sequence id, Lists of operations.
-  
+    Transaction transaction  = new Transaction(operations);
     transaction.B.source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
     transaction.B.sequence_id = new BigInteger(sequence_id);
     transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);

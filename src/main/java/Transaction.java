@@ -1,13 +1,19 @@
+package org.sebak.sdk;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.github.novacrypto.base58.Base58;
+
 import org.ethereum.util.RLP;
 import org.stellar.sdk.KeyPair;
+
 import shadow.org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.IOException;
+import java.lang.String;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -20,26 +26,29 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class Transaction {
 
-    TxHead H;
-    TxBody B;
+    private TxHead H;
+    private TxBody B;
 
-
-    public Transaction(ArrayList<Operation> operations) {
+    public Transaction(String sourceAccount, String sequencId, ArrayList<Operation> operations) {
         this.H = new TxHead();
-        this.B = new TxBody(operations);
-
+        this.B = new TxBody(sourceAccount, sequencId, operations);
     }
 
-    public String formJson()throws JsonProcessingException {
-        String txJsonform ;
+    public String toJson() {
+        String txToJson = "";
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        txJsonform = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
-        System.out.println(txJsonform);
-        return txJsonform;
-
+        try {
+            txToJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+        }
+        catch (JsonProcessingException e) {
+            System.out.println(e.getMessage());
+        }
+        return txToJson;
     }
 
     public byte[] Doublesha256Hash(byte[] msg) throws NoSuchAlgorithmException{
@@ -48,32 +57,75 @@ public class Transaction {
             MessageDigest result = MessageDigest.getInstance("SHA-256");
             result.update(messageDigest.digest());
             return result.digest();
-
     }
 
     public String doHashing() throws NoSuchAlgorithmException {
         byte[] Rlpencoded = RLP.encode(this.B.operationsArray());
-        System.out.println(Util.ByteArrayToHexString(Rlpencoded));;
         String Hashresult = Base58.base58Encode(this.Doublesha256Hash(Rlpencoded));
         return Hashresult;
     }
 
-    public String get_signature(String secretSeed, String Hash, String network_id) throws IOException {
+    public void sign(String secretSeed, String network_id) {
+        String txHash = "";
+        try {
+            txHash = this.doHashing();
+        }
+        catch (NoSuchAlgorithmException e) {
+            System.out.println(e.getMessage());
+        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byte[] networkid = network_id.getBytes(StandardCharsets.UTF_8);
-        byte[] hash = Hash.getBytes(StandardCharsets.UTF_8);
-        byteArrayOutputStream.write(networkid);
-        byteArrayOutputStream.write(hash);
-
+        byte[] hash = txHash.getBytes(StandardCharsets.UTF_8);
+        try {
+            byteArrayOutputStream.write(networkid);
+            byteArrayOutputStream.write(hash);
+        }
+        catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
         KeyPair keyPair = KeyPair.fromSecretSeed(secretSeed);
 
         byte[] result = keyPair.sign(byteArrayOutputStream.toByteArray());
-        return Base58.base58Encode(result);
-
+        this.H.signature = Base58.base58Encode(result);
     }
 
-}
+    public String getSignature() {
+        return this.H.signature;
+    }
 
+    public String getSourceAccount() {
+        return this.B.source;
+    }
+
+    public String getFee() {
+        return this.B.fee;
+    }
+
+    public static class Builder {
+        private final String mSourceAccount;
+        private final String mSequenceId;
+        ArrayList<Operation> mOperations;
+        private int mFee;
+
+        public Builder(String source, String sequenceId) {
+            checkNotNull(source, "secreteSeed cannot be null");
+            mSourceAccount = source;
+            mSequenceId = sequenceId;
+            mOperations = new ArrayList<Operation>();
+        }
+
+        public Builder addOperation(Operation operation) {
+            checkNotNull(operation, "operation cannot be null");
+            mOperations.add(operation);
+            return this;
+        }
+
+        public Transaction build() {    
+            Transaction transaction = new Transaction(mSourceAccount, mSequenceId, mOperations);
+            return transaction;
+        }
+    }
+}
 
 class TxBody{
     String source;
@@ -81,14 +133,15 @@ class TxBody{
     BigInteger sequence_id;
     ArrayList<Operation> operations;
 
-    public TxBody(ArrayList<Operation> operations) {
+    public TxBody(String source, String sequenceId, ArrayList<Operation> operations) {
+        this.source = source;
+        this.sequence_id = new BigInteger(sequenceId);
         this.operations = operations;
         if (operations.size()>1) {
             this.fee = Integer.toString(10000*operations.size());
         }else{
             this.fee = Integer.toString(10000);
         }
-
     }
 
     public Object[] operationsArray(){
@@ -100,18 +153,16 @@ class TxBody{
         Object[] result = {this.source,this.fee,this.sequence_id,operationsList};
         return result;
     }
-
 }
 
 class  TxHead {
-    String  version, created,signature;
+    String  version, created, signature;
 
     public TxHead() {
         this.version = "1";
-        this.created = this.getCreated();
-
+        this.created = this.setCreatedTime();
     }
-    public String getCreated() {
+    public String setCreatedTime() {
         Calendar calendar = Calendar.getInstance();
         Date createdTime = calendar.getTime();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSXXX");
@@ -119,7 +170,9 @@ class  TxHead {
         String created = simpleDateFormat.format(createdTime);
         return created;
     }
-
+    String getCreatedTime() {
+        return this.created;
+    }
 }
 
 class Util {

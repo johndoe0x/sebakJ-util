@@ -41,46 +41,19 @@ Then you can see the test result.
 ## transaction
 
 Transaction format is Json on basis.
- 
+
 ### Transaction header
 
 Transaction header consists of `version`,`created`(ISO8601 format) and `signature`.
 
 Every elements of Header `type` are `String`.
-
-#### make transaction signature
-
-1. Get RLP encoded byte array. 
-   You can see the detail in the [Transaction.java on doHashing().](https://github.com/MegaSolar/sebakJ-util/blob/aecfe2e1dd445f05734f42f1d452e209bd8d8987/src/main/java/Transaction.java#L52).
-   
-2. Make a signature with **secret seed** ,**network id** and **Hash**.
-
-3. For instance:
-   ```java
-    ...
-   Operation operation1 = new Operation(type1,target1,amount1);
-   Operation operation2 = new Operation(type2,target2,amount2);
-   
-   ArrayList<Operation> operations = new ArrayList<Operation>();
-   
-   operations.add(operation1);
-   operations.add(operation2);
-          
-    // When you Hashing through RLP encoding variables have to include 
-    // source, fee, sequence id, Lists of operations.
-    Transaction transaction  = new Transaction(operations);
-    transaction.B.source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
-    transaction.B.sequence_id = new BigInteger(sequence_id);
-    transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);
-    ...
-   ```
  
 ### Transaction body
 
 Transaction body consists of sender's public key (a.k.a **source**), **fee**(transaction fee), **sequence id**, 
 and **Lists of operation**.
 
-- sender's public key( A.K.A **source**): This is the sender's**secret seed**.
+- sender's public key( A.K.A **source**): This is generated from the sender's**secret seed**.
 
 - fee : It is multiplied by the number of operations in one transaction.
 
@@ -113,21 +86,18 @@ This limit also can be checked by node information.
 You can see the how operation lists make :
 
 ```java
- ...
+String newtork_id = "sebak-test-network";
+String sequence_id; // you have to search Sequence id on Sebak network through API.
+String secretSeed = "SAC3GZZ53LSLXBLW5IQTJJE7NWSHXT2SMJCEWN5U3CFBITAYG2WIUOB2";
+String source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
 String type1 = "payment";
 String type2 = "create-account";
 String amount1 = "100";
 String amount2 = "1000000";
 String targetAddress1 = "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE";
 String targetAddress2 = "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV";
-Operation op1 = new Operation(type1, amount1, targetAddress1);
-Operation op2 = new Operation(type2, amount2, targetAddress2);
-
-ArrayList<Operation> operations = new ArrayList<Operation>();
-    
-operations.add(operation1);
-operations.add(operation2);
- ...
+Operation operation1 = new Operation(type1, amount1, targetAddress1);
+Operation operation2 = new Operation(type2, amount2, targetAddress2);
 ``` 
 #### Create account operation
 
@@ -137,42 +107,39 @@ Please see [here](https://bosnet.github.io/sebak/api/#accounts-account-details-g
 Amount for creating account must be bigger than base reserve, you can check the amount from SEBAK node information like 'network-id'
 through access sebak main-net or test network that mentioned above.
 
-
 #### Payment operation
 
 Target address must exist in network.
 
-## Sending Transaction
+
+
+## Building a Transaction
+
+Check the existence of senders's account.
+Get the sequece id of sender's account.
+Start Building a transation.
 
 ```java
+Transaction transaction  = new Transaction.Builder(source, sequence_id)
+            .addOperation(operation1)
+            .addOperation(operation2)
+            .build();
+```
 
-String newtork_id = "sebak-test-network";
-String sequence_id; // you have to search Sequence id on Sebak network through API.
-String type1 = "payment";
-String type2 = "create-account";
-String amount1 = "100";
-String amount2 = "1000000";
-String targetAddress1 = "GB3AOQD2M5AKMNWUP2HFCVQYFQNGTAFTJ24BHZ56ONSGGOXMG3EBO6OE";
-String targetAddress2 = "GD54SAKFHJ2QSBLEHZIQV3UWQ42OD6VQ6HKF6TN6F72US3AUQNDSONEV";
-Operation op1 = new Operation(type1, amount1, targetAddress1);
-Operation op2 = new Operation(type2, amount2, targetAddress2);
+#### make transaction signature
+   
+Make a signature with **secret seed** ,**network id**.
+For instance:
 
-ArrayList<Operation> operations = new ArrayList<Operation>();
-operations.add(operation1);
-operations.add(operation2);
-
-Transaction transaction  = new Transaction(operations);
-transaction.B.source = KeyPair.fromSecretSeed(secretSeed).getAccountId();
-transaction.B.sequence_id = new BigInteger(sequence_id);
-transaction.H.signature = transaction.get_signature(secretSeed,transaction.doHashing(),newtork_id);
-
+```java
+transaction.sign(secretSeed, newtork_id);
 ```
 
 If you successfully sign your transaction, you can serialize your transaction instance to 'json'.
 
 ```json
 
-String json = transaction.formjson();
+String json = transaction.toJson();
 
 {
   "H" : {
@@ -205,10 +172,43 @@ String json = transaction.formjson();
   }
 }
 
-
 ```
 
+## Sending Transaction
 
+So you are ready to submit transactons, you can just post your json to SEBAK node.
+
+```sh
+$ curl -v \
+    -XPOST \
+    -H 'Content-Type: application/json' \
+    -d @your-transaction.json \
+    https://testnet-sebak.blockchainos.org/api/v1/transactions
+...
+> POST /api/v1/transactions HTTP/2
+> Host: testnet-sebak.blockchainos.org
+> User-Agent: curl/7.62.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 749
+>
+* Connection state changed (MAX_CONCURRENT_STREAMS == 100)!
+* We are completely uploaded and fine
+< HTTP/2 200
+< content-type: application/problem+json
+< x-ratelimit-limit: 100
+< x-ratelimit-remaining: 98
+< x-ratelimit-reset: 1542432619
+< date: Sat, 17 Nov 2018 05:30:08 GMT
+< content-length: 101
+< via: 1.1 google
+< alt-svc: clear
+<
+* Connection #0 to host testnet-sebak.blockchainos.org left intact
+...
+```
+
+The API of sending transaction, please see https://bosnet.github.io/sebak/api/#trasactions-transactions-post .
 
 
 
